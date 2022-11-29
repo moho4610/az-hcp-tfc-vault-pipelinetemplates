@@ -1,0 +1,48 @@
+parameters:
+  - name: tflocation
+    type: string
+
+jobs:
+  - job: Validate
+    displayName: 'Validate'
+    steps:
+    - script: |
+        pwd
+        ls -l   
+      name: Debugdir
+      displayName: 'Running debug scripts'
+      workingDirectory: '$(System.DefaultWorkingDirectory)'
+
+
+    - task: TerraformInstaller@0
+      displayName: install terraform
+      inputs:
+        terraformVersion: latest
+
+
+    - task: TerraformCLI@0
+      displayName: 'Terraform Init'
+      env:
+        TF_TOKEN_app_terraform_io: $(tfcloud-user-token)
+      inputs:
+        command: 'init'
+        workingDirectory: $(System.DefaultWorkingDirectory)/${{ parameters.tflocation }}
+        allowTelemetryCollection: true
+
+    - task: TerraformCLI@0
+      displayName: 'Terraform fmt'
+      env:
+        TF_TOKEN_app_terraform_io: $(tfcloud-user-token)
+      inputs:
+        command: 'fmt'
+        commandOptions: "-check"
+        workingDirectory: $(System.DefaultWorkingDirectory)/${{ parameters.tflocation }}
+        allowTelemetryCollection: true
+        
+    - script: |
+        
+        ls -l
+        
+      name: Debug
+      displayName: 'Running debug scripts'
+      workingDirectory: ${{parameters.tflocation}}

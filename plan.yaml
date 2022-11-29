@@ -1,0 +1,42 @@
+parameters:
+  - name: tflocation
+    type: string
+    default: ''
+
+jobs:
+  - job: Plan
+    displayName: 'Terraform Plan'  
+    steps:
+    - script: |
+        pwd
+        ls -l
+        
+      name: Debugdir
+      displayName: 'Running debug scripts'
+      workingDirectory: '$(System.DefaultWorkingDirectory)'
+
+
+    - task: TerraformInstaller@0
+      displayName: install terraform
+      inputs:
+        terraformVersion: latest
+
+
+    - task: TerraformCLI@0
+      displayName: 'Terraform Init'
+      env:
+        TF_TOKEN_app_terraform_io: $(tfcloud-user-token)
+      inputs:
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/${{ parameters.tflocation }}'
+        allowTelemetryCollection: true
+        
+    - task: TerraformCLI@0
+      displayName: 'Terraform plan'
+      env:
+        TF_TOKEN_app_terraform_io: $(tfcloud-user-token)
+      inputs:
+        command: 'plan'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/${{ parameters.tflocation }}'
+        allowTelemetryCollection: true
+        publishPlanResults: "PlanReport"

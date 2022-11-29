@@ -1,0 +1,54 @@
+
+parameters:
+  - name: tflocation
+    type: string
+    default: ''
+  - name: environment
+    displayName: Allowed Environments
+    type: string
+    default: az-terra-lab
+    values:
+    - az-terra-lab
+
+
+stages:
+
+##---------------------------------------------##
+## Validate and Build                          ##
+##---------------------------------------------##
+
+  - stage: "TFBuild"
+    displayName: 'TF Build'
+    jobs:
+      - template: build.yaml
+        parameters: 
+          tflocation: ${{parameters.tflocation}}
+
+##---------------------------------------------##
+## Planning Stage                              ##
+##---------------------------------------------##
+
+  - stage: "TFPlan"
+    displayName: 'TF Plan'
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    dependsOn: [TFBuild]
+    jobs:
+      - template: plan.yaml
+        parameters: 
+          tflocation: ${{parameters.tflocation}}
+
+##---------------------------------------------##
+## Deployment stage                            ##
+##---------------------------------------------##
+
+  - stage: "TFDeploy"
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    #condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['TERRAFORM_PLAN_HAS_CHANGES'], 'true'))
+    displayName: 'TF Deploy'
+    dependsOn: [TFPlan]
+    jobs:
+      - deployment: Deploy
+        environment: ${{ parameters.environment }}                    ##Add release control for the environment referenced here.
+      - template: deploy.yaml
+        parameters: 
+          tflocation: ${{parameters.tflocation}}
