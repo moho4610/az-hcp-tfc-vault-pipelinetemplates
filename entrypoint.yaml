@@ -3,6 +3,10 @@ parameters:
   - name: tflocation
     type: string
     default: ''
+  
+  - name: appenv
+    type: string
+
   - name: environment
     displayName: Allowed Environments
     type: string
@@ -23,6 +27,7 @@ stages:
       - template: build.yaml
         parameters: 
           tflocation: ${{parameters.tflocation}}
+          appenv: ${{parameters.appenv}}
 
 ##---------------------------------------------##
 ## Planning Stage                              ##
@@ -36,6 +41,7 @@ stages:
       - template: plan.yaml
         parameters: 
           tflocation: ${{parameters.tflocation}}
+          appenv: ${{parameters.appenv}}
 
 ##---------------------------------------------##
 ## Deployment stage                            ##
@@ -52,3 +58,4 @@ stages:
       - template: deploy.yaml
         parameters: 
           tflocation: ${{parameters.tflocation}}
+          appenv: ${{parameters.appenv}}

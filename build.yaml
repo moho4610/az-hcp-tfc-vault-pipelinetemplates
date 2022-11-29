@@ -2,6 +2,10 @@ parameters:
   - name: tflocation
     type: string
 
+  - name: appenv
+    type: string
+
+
 jobs:
   - job: Validate
     displayName: 'Validate'
@@ -13,6 +17,12 @@ jobs:
       displayName: 'Running debug scripts'
       workingDirectory: '$(System.DefaultWorkingDirectory)'
 
+    - task: CopyFiles@2
+      displayName: 'Copying environment specific Terraform files'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/${{ parameters.tflocation }}/env-config/${{ parameters.appenv }}'
+        Contents: '**'
+        TargetFolder: '$(System.DefaultWorkingDirectory)/${{ parameters.tflocation }}'
 
     - task: TerraformInstaller@0
       displayName: install terraform
